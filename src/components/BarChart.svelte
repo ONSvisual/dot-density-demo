@@ -11,21 +11,23 @@
   <tbody>
     {#each dataset.categories as cat, i}
     <tr class="text-sml">
-      <td colspan=3>{cat.name}</td>
+      <td>
+				{cat.name}
+				<span class="bold">{hovered && data[hovered.areacd] ? data[hovered.areacd][cat.code].toFixed(1) : selected && data[selected.areacd] ? data[selected.areacd][cat.code].toFixed(1) : data["K04000001"][cat.code].toFixed(1)}%</span>
+				<span class="grey">({data["K04000001"][cat.code].toFixed(1)}%)</span>
+			</td>
     </tr>
     <tr>
       <td class="chart-bar-group">
-        {#if hovered && data[hovered]}
-        <div class="chart-bar" style:width="{data[hovered][cat.code]}%" style:background-color="{colors[i]}"/>
-        {:else if selected && data[selected]}
-        <div class="chart-bar" style:width="{data[selected][cat.code]}%" style:background-color="{colors[i]}"/>
+        {#if hovered && data[hovered.areacd]}
+        <div class="chart-bar" style:width="{data[hovered.areacd][cat.code]}%" style:background-color="{colors[i]}"/>
+        {:else if selected && data[selected.areacd]}
+        <div class="chart-bar" style:width="{data[selected.areacd][cat.code]}%" style:background-color="{colors[i]}"/>
         {:else}
         <div class="chart-bar" style:width="{data["K04000001"][cat.code]}%" style:background-color="{colors[i]}"/>
         {/if}
         <div class="chart-marker" style:left="{data["K04000001"][cat.code]}%" style:background-color="black"/>
       </td>
-      <td class="chart-num bold">{hovered && data[hovered] ? data[hovered][cat.code].toFixed(1) : selected && data[selected] ? data[selected][cat.code].toFixed(1) : data["K04000001"][cat.code].toFixed(1)}%</td>
-      <td class="chart-num text-sml">({data["K04000001"][cat.code].toFixed(1)}%)</td>
     </tr>
     {/each}
   </tbody>
@@ -40,6 +42,7 @@
 	}
 	.chart-bar-group {
 		width: auto;
+		height: 16px;
 		position: relative;
 	}
 	.chart-bar {
@@ -61,7 +64,13 @@
 	.bold {
 		font-weight: bold;
 	}
-	.text-sml {
+	tr.text-sml {
 		font-size: 0.9rem;
+	}
+	tr.text-sml > td {
+		padding-top: 2px;
+	}
+	span.grey {
+		color: #777;
 	}
 </style>

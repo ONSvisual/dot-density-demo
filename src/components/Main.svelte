@@ -18,4 +18,10 @@
     flex-grow: 1;
     overflow: hidden;
   }
+  @media (max-width: 768px) {
+    main {
+      flex-direction: column !important;
+      overflow: visible;
+    }
+  }
 </style>

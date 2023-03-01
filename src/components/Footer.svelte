@@ -296,4 +296,9 @@
     transition: all .1s ease-out;
     transform: rotate(0deg);
   }
+  @media (max-width: 768px) {
+    footer {
+      display: none;
+    }
+  }
 </style>

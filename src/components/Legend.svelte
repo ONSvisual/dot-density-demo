@@ -28,6 +28,9 @@
     line-height: 1.5rem;
     box-sizing: border-box;
     border-style: solid;
+    display: grid;
+    grid-template-columns: 3fr 5fr;
+    flex-direction: row;
     width: 100%;
     max-width: 50rem;
     border-color: rgb(226 226 227);

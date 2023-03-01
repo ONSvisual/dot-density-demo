@@ -2,6 +2,7 @@
 	import { onMount } from "svelte";
 	import { csvParse, autoType } from "d3-dsv";
 	import { Map, MapSource, MapLayer } from "@onsvisual/svelte-maps";
+	import { getQuads } from "./js/utils";
 	import Body from "./components/Body.svelte";
 	import Header from "./components/Header.svelte";
 	import Main from "./components/Main.svelte";
@@ -9,9 +10,12 @@
 	import MapContainer from "./components/MapContainer.svelte";
 	import Legend from "./components/Legend.svelte";
 	import BarChart from "./components/BarChart.svelte";
+	import AreaInfo from "./components/AreaInfo.svelte";
+	import Select from "./components/Select.svelte";
 
 	const datasets_path = "./data/content.json";
-	const csv_path = (geo, tile, key) => `https://onsvisual.github.io/dot-density-data/output/data/${geo}/${tile}/${key}.csv`;
+	const quads_path = "./data/quads.json";
+	const csv_path = (geo, quad, key) => `https://onsvisual.github.io/dot-density-data/output/data/${geo}/${quad}/${key}.csv`;
 	const tiles_path = (key) => window.location.hostname === "localhost" ? `pmtiles://./tiles/${key}-z11.pmtiles` : `pmtiles://https://onsvisual.github.io/dot-density-data/output/tiles/${key}-z11.pmtiles`;
 	// const available = ["accommodation_type_3a",	"hh_tenure_5a", "country_of_birth_3a", "legal_partnership_status_3a", "economic_activity_status_4a", "sex", "ethnic_group_tb_6a"];
 	const colors = ['#3bb2d0', '#e55e5e', '#223b53', '#fbb03b', '#ccc'];
@@ -20,17 +24,40 @@
 			key: "lad",
 			url: "https://cdn.ons.gov.uk/maptiles/administrative/2021/authorities-ew/v2/boundaries/{z}/{x}/{y}.pbf",
 			layer: "lad",
-			promoteId: "areacd"
+			promoteId: "areacd",
+			nameField: "areanm"
+		},
+		{
+			key: "msoa",
+			url: "https://cdn.ons.gov.uk/maptiles/administrative/2021/msoa/v2/boundaries/{z}/{x}/{y}.pbf",
+			layer: "msoa",
+			promoteId: "areacd",
+			nameField: "hclnm"
+		},
+		{
+			key: "oa",
+			url: "https://cdn.ons.gov.uk/maptiles/administrative/2021/oa/v2/boundaries/{z}/{x}/{y}.pbf",
+			layer: "oa",
+			promoteId: "areacd",
+			nameField: "areacd"
 		}
 	];
+	let geo = "lad";
 
-	let datasets;
-	let _dataset;
-	let dataset;
-	let data;
+	let centroids; // The centre points of OA data quads (to calculate feature density)
+	let quads; // OA and MSOA data quads (invisible layer on map)
+	let datasets; // Array of all available datasets, with metadata
+	let dataset; // The selected dataset (from above array)
+	let _dataset; // For binding dataset selection before updating "dataset" var
+	let data; // Loaded data for current dataset
+	let data_quads; // Data quads that have been loaded for current dataset
 
-	let selected = "K04000001";
+	let selected;
+	let selected_geo;
 	let hovered;
+
+	let map = null;
+	let zoom;
 
 	function makeColors(categories) {
 		let cols = ["match", ["get", "cat"]];
@@ -39,16 +66,36 @@
 			cols.push(colors[i]);
 		});
 		cols.push("rgba(0,0,0,0)");
-		console.log(cols);
 		return cols;
 	}
 
 	async function preloadData(dataset) {
+		let qc = await getQuads(quads_path);
+		centroids = qc.centroids;
+		quads = qc.quads;
 		let str = await (await fetch(csv_path("lad", "ew", dataset.classCode))).text();
 		let data_raw = csvParse(str, autoType);
 		let data_new = {};
 		data_raw.forEach(d => data_new[d.areacd] = d);
+		data_quads = new Set(["lad_ew"]);
 		data = data_new;
+		getNewData();
+	}
+
+	async function getQuadData(geo, quad, key) {
+		console.log(`Getting quad`, geo, quad, key);
+		data_quads.add(`${geo}_${quad}`);
+		let str = await (await fetch(csv_path(geo, quad, key))).text();
+		let data_raw = csvParse(str, autoType);
+		data_raw.forEach(d => data[d.areacd] = d);
+	}
+
+	function getNewData() {
+		const features = map.getLayer(`quads-${geo}`) ? map.queryRenderedFeatures({ layers: [`quads-${geo}`] }) : [];
+		features.forEach(f => {
+			let quad = f.properties.code;
+			if (!data_quads.has(`${geo}_${quad}`)) getQuadData(geo, quad, dataset.classCode);
+		});
 	}
 
 	async function updateDataset() {
@@ -57,13 +104,61 @@
 		preloadData(dataset);
 	}
 
+	function getGeoType() {
+		const features = map.getLayer("centroids") ? map.queryRenderedFeatures({ layers: ["centroids"] }) : [];
+		if (Array.isArray(features)) {
+			const count = features.length;
+			const canvas = map.getCanvas();
+			const pixelArea = canvas.clientWidth * canvas.clientHeight;
+			return (count * 1e6) / pixelArea > 40 ? "lad" : (count * 1e6) / pixelArea > 3 ? "msoa" : "oa";
+		} else {
+			return "lad";
+		}
+	}
+
+	function initMap() {
+		map.on("moveend", () => {
+			geo = getGeoType();
+			getNewData();
+		});
+	}
+
+	function mapSelect(e, layer) {
+		let areacd = e.detail.id;
+		let areanm = e.detail.feature.properties[layer.nameField];
+		selected = {areacd, areanm};
+	}
+
+	function mapHover(e, layer) {
+		if (e.detail.feature) {
+			let areacd = e.detail.id;
+			let areanm = e.detail.feature.properties[layer.nameField];
+			hovered = {areacd, areanm};
+		} else {
+			hovered  = null;
+		}
+	}
+
+	function doSelect(e) {
+		selected = e.detail;
+		selected_geo = e.detail.geometry ? e.detail.geometry : null;
+		if (e.detail.bbox) map.fitBounds(e.detail.bbox, {padding: 40});
+	}
+
+	function doClear() {
+		selected = null;
+		selected_geo = null;
+		map.fitBounds([-5.816, 49.864, 1.863, 55.872]);
+	}
+
 	onMount(async () => {
 		let ds = await (await fetch(datasets_path)).json();
-		// datasets = ds.filter(d => available.includes(d.classCode));
 		datasets = [...ds].sort((a, b) => a.varName.localeCompare(b.varName));
 		dataset = _dataset = datasets[0];
 		preloadData(dataset);
 	});
+
+	$: console.log("zoom", zoom);
 </script>
 
 <Body>
@@ -71,7 +166,7 @@
 	<Main>
 		<Panel>
 			<div slot="area">
-				{selected ? selected : ""}
+				<Select value={selected} on:select={doSelect} on:clear={doClear}/>
 			</div>
 			<div slot="topics" class="topic-list">
 				{#if dataset}
@@ -85,7 +180,37 @@
 			</div>
 		</Panel>
 		<MapContainer>
-			<Map style="https://bothness.github.io/ons-basemaps/data/style-omt.json" location={{bounds: [-7.57216793459, 49.959999905, 1.68153079591, 58.6350001085]}} controls pmtiles>
+			<Map
+				bind:map bind:zoom
+				style="https://bothness.github.io/ons-basemaps/data/style-omt.json"
+				location={{bounds: [-7.57216793459, 49.959999905, 1.68153079591, 58.6350001085]}}
+				on:load={initMap}
+				controls pmtiles>
+				{#each Object.keys(quads) as key}
+				<MapSource
+					id="quads-{key}"
+					type="geojson"
+					data={quads[key]}>
+					<MapLayer
+						id="quads-{key}"
+						type="fill"
+						paint={{"fill-color": "rgba(0,0,0,0)"}}/>
+				</MapSource>
+				{/each}
+				{#if centroids}
+				<MapSource
+					id="centroids"
+					type="geojson"
+					data={centroids}>
+					<MapLayer
+						id="centroids"
+						type="circle"
+						paint={{
+							"circle-radius": 1,
+							"circle-color": "rgba(0,0,0,0)"
+							}}/>
+				</MapSource>
+				{/if}
 				{#if dataset}
 				{#key dataset}
 				<MapSource
@@ -100,8 +225,8 @@
 							"circle-color": makeColors(dataset.categories.map(c => c.code)),
 							"circle-radius": {
 							"stops": [
-									[8, 1],
-									[13, 1.5],
+									[8, 0.7],
+									[12, 1.2],
 									[15, 3]
 								]
 							}
@@ -120,31 +245,45 @@
 					<MapLayer
 						id="{l.key}-fill"
 						type="fill"
-						hover bind:hovered
-						select bind:selected
-						paint={{"fill-color": "rgba(0,0,0,0)"}}/>
+						hover on:hover={(e) => mapHover(e, l)}
+						select on:select={(e) => mapSelect(e, l)}
+						paint={{"fill-color": "rgba(0,0,0,0)"}}
+						visible={l.key === geo}/>
 					<MapLayer
 						id="{l.key}-line"
 						type="line"
 						paint={{
 							'line-color': ['case',
-								['==', ['feature-state', 'hovered'], true], 'orange',
-								['==', ['feature-state', 'selected'], true], 'black',
+								['==', ['feature-state', 'hovered'], true], 'black',
 								'rgba(64,64,64,0.2)'
 							],
 							'line-width': ['case',
 								['==', ['feature-state', 'hovered'], true], 2,
-								['==', ['feature-state', 'selected'], true], 2,
 								0.5
 							]
 						}}
+						visible={l.key === geo}
 						order="place_other"/>
 				</MapSource>
 				{/each}
+				<MapSource
+					id="selected"
+					type="geojson"
+					data={selected_geo ? selected_geo : {type: "FeatureCollection", features: []}}>
+					<MapLayer
+						id="selected"
+						type="line"
+						paint={{
+							'line-color': 'black',
+							'line-width': 2
+						}}
+						order="place_other"/>
+				</MapSource>
 			</Map>
 			<Legend>
 				{#if dataset && data}
-				<BarChart {dataset} {data} {hovered} {selected}/>
+				<AreaInfo {selected} {hovered} {zoom} {dataset}/>
+				<BarChart {dataset} {data} {hovered} selected={selected}/>
 				{/if}
 			</Legend>
 		</MapContainer>

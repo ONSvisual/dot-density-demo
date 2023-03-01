@@ -12,5 +12,11 @@
     border-width: 0;
     position: relative;
     flex-grow: 1;
+    min-height: 90vh;
+  }
+  @media (max-width: 768px) {
+    div.map-container {
+      width: 100%;
+    }
   }
 </style>

@@ -2,7 +2,7 @@
   import Footer from "./Footer.svelte";
 
   export let title = "Dot density maps";
-  export let description = "An experimental mapping of Census 2021 data for England and Wales using dots.";
+  export let description = "An experimental mapping of Census 2021 data for England and Wales using dots to represent people or households.";
 </script>
 
 <div class="panel">
@@ -12,20 +12,20 @@
         {title}
       </h1>
       <div>
-        {description}
+        {@html description}
       </div>
     </div>
     <div class="body">
       <section class="area">
         <h2>Area</h2>
-        <nav class="breadcrumb" aria-label="Breadcrumb">
-          <div class=""><slot name="area"/></div>
-        </nav>
+        <div class="area-box">
+          <slot name="area"/>
+        </div>
       </section>
       <section class="topics">
         <h2>Topics</h2>
-        <nav class="breadcrumb" aria-label="Breadcrumb">
-          <div class="">All topics</div>
+        <nav class="breadcrumb">
+          <div>All topics</div>
         </nav>
         <div class="content"><div>Select a topic to view it on the map.</div></div>
         <slot name="topics"/>
@@ -58,6 +58,11 @@
     right: 0;
     position: relative;
     width: 27rem;
+  }
+  @media (max-width: 768px) {
+    div.panel {
+      width: 100%;
+    }
   }
   div.panel > div {
     -webkit-text-size-adjust: 100%;
@@ -170,5 +175,10 @@
     border-width: 0;
     margin-top: 1rem;
     margin-bottom: .5rem;
+  }
+  section.area > div.area-box {
+    display: block;
+    width: 100%;
+    margin-top: 4px;
   }
 </style>
