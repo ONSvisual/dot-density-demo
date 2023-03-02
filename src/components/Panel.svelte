@@ -40,7 +40,7 @@
           </button>
         </nav>
         <div class="content" style:display={topics_open ? "block" : "none"}>
-          <div>Choose a topic to view it on the map.</div>
+          <div class="content-label">Choose a topic to view it on the map.</div>
           <slot name="topics"/>
         </div>
       </section>
@@ -185,6 +185,8 @@
     line-height: 1.5rem;
     border-width: 0;
     margin-top: 1rem;
+  }
+  section.topics .content-label {
     margin-bottom: .5rem;
   }
   section.area > div.area-box {
