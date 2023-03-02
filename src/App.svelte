@@ -3,6 +3,7 @@
 	import { csvParse, autoType } from "d3-dsv";
 	import { Map, MapSource, MapLayer } from "@onsvisual/svelte-maps";
 	import { getQuads } from "./js/utils";
+	import PhaseBanner from "./components/PhaseBanner.svelte";
 	import Body from "./components/Body.svelte";
 	import Header from "./components/Header.svelte";
 	import Main from "./components/Main.svelte";
@@ -163,6 +164,7 @@
 </script>
 
 <Body>
+	<PhaseBanner/>
 	<Header/>
 	<Main>
 		<Panel>

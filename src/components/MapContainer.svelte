@@ -17,7 +17,8 @@
   @media (max-width: 768px) {
     div.map-container {
       width: 100%;
-      height: 500px;
+      height: 600px;
+      max-height: 90vh;
     }
   }
 </style>
