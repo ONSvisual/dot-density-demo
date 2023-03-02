@@ -20,6 +20,7 @@
 	const tiles_path = (key) => window.location.hostname === "localhost" ? `pmtiles://./tiles/${key}-z11.pmtiles` : `pmtiles://https://onsvisual.github.io/dot-density-data/output/tiles/${key}-z11.pmtiles`;
 	// const available = ["accommodation_type_3a",	"hh_tenure_5a", "country_of_birth_3a", "legal_partnership_status_3a", "economic_activity_status_4a", "sex", "ethnic_group_tb_6a"];
 	const colors = ['#3bb2d0', '#e55e5e', '#223b53', '#fbb03b', '#ccc'];
+	// const colors = ['#206095', '#F66068', '#871A5B', '#A8BD3A', '#CCCCCC'];
 	const layers = [
 		{
 			key: "lad",
@@ -219,7 +220,8 @@
 				<MapSource
 					id="dots"
 					type="vector"
-					url="{tiles_path(dataset.classCode)}">
+					url="{tiles_path(dataset.classCode)}"
+					maxzoom={11}>
 					<MapLayer
 						id="dots"
 						type="circle"
@@ -244,7 +246,8 @@
 					type="vector"
 					url={l.url}
 					layer={l.layer}
-					promoteId={l.promoteId}>
+					promoteId={l.promoteId}
+					maxzoom={12}>
 					<MapLayer
 						id="{l.key}-fill"
 						type="fill"
@@ -286,7 +289,7 @@
 			<Legend>
 				{#if dataset && data}
 				<AreaInfo {selected} {hovered} {zoom} {dataset}/>
-				<BarChart {dataset} {data} {hovered} selected={selected}/>
+				<BarChart {dataset} {data} {hovered} {colors} selected={selected}/>
 				{/if}
 			</Legend>
 		</MapContainer>

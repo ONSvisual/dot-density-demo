@@ -27,7 +27,7 @@
     margin-left: 20px;
   }
   .ons-phase-banner {
-      background: #f5f5f6;
+      background: #fbb03b;
       padding: 0.5rem 0;
   }
   .ons-grid {
