@@ -42,8 +42,9 @@
 			nameField: "areacd"
 		}
 	];
-	let geo = "lad";
+	const bounds_ew = [-5.816, 49.864, 1.863, 55.872];
 
+	let geo = "lad";
 	let centroids; // The centre points of OA data quads (to calculate feature density)
 	let quads; // OA and MSOA data quads (invisible layer on map)
 	let datasets; // Array of all available datasets, with metadata
@@ -148,7 +149,7 @@
 	function doClear() {
 		selected = null;
 		selected_geo = null;
-		map.fitBounds([-5.816, 49.864, 1.863, 55.872]);
+		map.fitBounds(bounds_ew);
 	}
 
 	onMount(async () => {
@@ -183,7 +184,7 @@
 			<Map
 				bind:map bind:zoom
 				style="https://bothness.github.io/ons-basemaps/data/style-omt.json"
-				location={{bounds: [-7.57216793459, 49.959999905, 1.68153079591, 58.6350001085]}}
+				location={{bounds: bounds_ew}}
 				on:load={initMap}
 				controls pmtiles>
 				{#each Object.keys(quads) as key}

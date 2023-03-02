@@ -7,31 +7,25 @@
 </script>
 
 {#if data && dataset}
-<table class="chart">
-  <tbody>
-    {#each dataset.categories as cat, i}
-    <tr class="text-sml">
-      <td>
-				{cat.name}
-				<span class="bold">{hovered && data[hovered.areacd] ? data[hovered.areacd][cat.code].toFixed(1) : selected && data[selected.areacd] ? data[selected.areacd][cat.code].toFixed(1) : data["K04000001"][cat.code].toFixed(1)}%</span>
-				<span class="grey">({data["K04000001"][cat.code].toFixed(1)}%)</span>
-			</td>
-    </tr>
-    <tr>
-      <td class="chart-bar-group">
-        {#if hovered && data[hovered.areacd]}
-        <div class="chart-bar" style:width="{data[hovered.areacd][cat.code]}%" style:background-color="{colors[i]}"/>
-        {:else if selected && data[selected.areacd]}
-        <div class="chart-bar" style:width="{data[selected.areacd][cat.code]}%" style:background-color="{colors[i]}"/>
-        {:else}
-        <div class="chart-bar" style:width="{data["K04000001"][cat.code]}%" style:background-color="{colors[i]}"/>
-        {/if}
-        <div class="chart-marker" style:left="{data["K04000001"][cat.code]}%" style:background-color="black"/>
-      </td>
-    </tr>
-    {/each}
-  </tbody>
-</table>
+<div class="chart">
+	{#each dataset.categories as cat, i}
+	<div class="text-sml">
+		{cat.name}
+		<span class="bold">{hovered && data[hovered.areacd] ? data[hovered.areacd][cat.code].toFixed(1) : selected && data[selected.areacd] ? data[selected.areacd][cat.code].toFixed(1) : data["K04000001"][cat.code].toFixed(1)}%</span>
+		<span class="grey">({data["K04000001"][cat.code].toFixed(1)}%)</span>
+	</div>
+	<div class="chart-bar-group">
+		{#if hovered && data[hovered.areacd]}
+		<div class="chart-bar" style:width="{data[hovered.areacd][cat.code]}%" style:background-color="{colors[i]}"/>
+		{:else if selected && data[selected.areacd]}
+		<div class="chart-bar" style:width="{data[selected.areacd][cat.code]}%" style:background-color="{colors[i]}"/>
+		{:else}
+		<div class="chart-bar" style:width="{data["K04000001"][cat.code]}%" style:background-color="{colors[i]}"/>
+		{/if}
+		<div class="chart-marker" style:left="{data["K04000001"][cat.code]}%" style:background-color="black"/>
+	</div>
+	{/each}
+</div>
 {/if}
 
 <style>
@@ -58,16 +52,11 @@
 		width: 3px;
 		transform: translateX(-50%);
 	}
-	.chart-num {
-		width: 60px;
-	}
 	.bold {
 		font-weight: bold;
 	}
-	tr.text-sml {
+	.text-sml {
 		font-size: 0.9rem;
-	}
-	tr.text-sml > td {
 		padding-top: 2px;
 	}
 	span.grey {

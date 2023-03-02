@@ -1,8 +1,17 @@
 <script>
+  import { onMount } from "svelte";
   import Footer from "./Footer.svelte";
+  import Icon from "./Icon.svelte";
 
   export let title = "Dot density maps";
   export let description = "An experimental mapping of Census 2021 data for England and Wales using dots to represent people or households.";
+
+  let topics_open = true;
+
+  onMount(() => {
+    let w = document.body.clientWidth;
+    topics_open = w > 768;
+  });
 </script>
 
 <div class="panel">
@@ -25,10 +34,15 @@
       <section class="topics">
         <h2>Topics</h2>
         <nav class="breadcrumb">
-          <div>All topics</div>
+          <button on:click={() => topics_open = !topics_open}>
+            <div>{topics_open ? "Select a topic" : "Click to show topics"}</div>
+            <Icon type="chevron" rotation={topics_open ? 90 : -90}/>
+          </button>
         </nav>
-        <div class="content"><div>Select a topic to view it on the map.</div></div>
-        <slot name="topics"/>
+        <div class="content" style:display={topics_open ? "block" : "none"}>
+          <div>Choose a topic to view it on the map.</div>
+          <slot name="topics"/>
+        </div>
       </section>
     </div>
     <div class="grow"/>
@@ -58,11 +72,6 @@
     right: 0;
     position: relative;
     width: 27rem;
-  }
-  @media (max-width: 768px) {
-    div.panel {
-      width: 100%;
-    }
   }
   div.panel > div {
     -webkit-text-size-adjust: 100%;
@@ -161,9 +170,11 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    justify-content: space-between;
     gap: .5rem;
     font-size: 1.25rem;
     line-height: 1.75rem;
+    width: 100%;
   }
   section.area > .content, section.topics > .content {
     -webkit-text-size-adjust: 100%;
@@ -180,5 +191,36 @@
     display: block;
     width: 100%;
     margin-top: 4px;
+  }
+  .breadcrumb > button {
+    background: none;
+    border: 0;
+    margin: 0;
+    text-align: right;
+    padding: 4px 4px 4px 0;
+    flex-grow: 1;
+    cursor: pointer;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+  @media (max-width: 768px) {
+    div.panel {
+      width: 100%;
+      border-bottom: 2px solid rgb(229, 231, 235);
+    }
+    div.panel .header {
+      padding-top: 1rem;
+      padding-bottom: 1rem;
+    }
+    div.panel .header > h1 {
+      font-size: 1.5rem;
+      line-height: 2rem;
+    }
+    div.panel .header > div {
+      font-size: 0.9rem;
+      line-height: 1.25rem;
+    }
   }
 </style>

@@ -20,7 +20,7 @@
 <div class="info">
   <div class="info-place">{hovered ? hovered.areanm : selected ? selected.areanm : "England and Wales"}</div>
   <div class="info-dataset">{dataset ? dataset.varName : ""}</div>
-  <div class="info-small mt">One dot = {getCount(zoom).toLocaleString()} people</div>
+  <div class="info-small mt">One dot = {getCount(zoom).toLocaleString()} {dataset.unit}s</div>
   <div class="info-small"><div class="marker"/> (% for England and Wales)</div>
 </div>
 
