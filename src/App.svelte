@@ -269,7 +269,7 @@
 							]
 						}}
 						visible={l.key === geo}
-						order="place_other"/>
+						order="place_suburb"/>
 				</MapSource>
 				{/each}
 				<MapSource
@@ -283,7 +283,7 @@
 							'line-color': 'black',
 							'line-width': 2
 						}}
-						order="place_other"/>
+						order="place_suburb"/>
 				</MapSource>
 			</Map>
 			<Legend>
