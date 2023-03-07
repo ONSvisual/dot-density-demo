@@ -58,6 +58,7 @@
 	let selected;
 	let selected_geo;
 	let hovered;
+	let filter = [];
 
 	let map = null;
 	let zoom;
@@ -103,6 +104,7 @@
 
 	async function updateDataset() {
 		data = null;
+		filter = [];
 		dataset = _dataset;
 		preloadData(dataset);
 	}
@@ -161,7 +163,7 @@
 		preloadData(dataset);
 	});
 
-	$: console.log("zoom", zoom);
+	$: console.log("filter", filter);
 </script>
 
 <Body>
@@ -236,6 +238,7 @@
 								]
 							}
 						}}
+						filter={filter[0] ? ["!in", "cat", ...filter] : null}
 						order="place_other"/>
 				</MapSource>
 				{/key}
@@ -289,7 +292,7 @@
 			<Legend>
 				{#if dataset && data}
 				<AreaInfo {selected} {hovered} {zoom} {dataset}/>
-				<BarChart {dataset} {data} {hovered} {colors} selected={selected}/>
+				<BarChart {dataset} {data} {hovered} {colors} selected={selected} bind:filter/>
 				{/if}
 			</Legend>
 		</MapContainer>
