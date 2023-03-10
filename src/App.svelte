@@ -17,7 +17,7 @@
 	const datasets_path = "./data/content.json";
 	const quads_path = "./data/quads.json";
 	const csv_path = (geo, quad, key) => `https://onsvisual.github.io/dot-density-data/output/data/${geo}/${quad}/${key}.csv`;
-	const tiles_path = (key) => window.location.hostname === "localhost" ? `pmtiles://./tiles/${key}-z11.pmtiles` : `pmtiles://https://onsvisual.github.io/dot-density-data/output/tiles/${key}-z11.pmtiles`;
+	const tiles_path = (key) => `https://cdn.ons.gov.uk/maptiles/census-dots/v1/${key}/{z}/{x}/{y}.pbf`;
 	// const available = ["accommodation_type_3a",	"hh_tenure_5a", "country_of_birth_3a", "legal_partnership_status_3a", "economic_activity_status_4a", "sex", "ethnic_group_tb_6a"];
 	const colors = ['#3bb2d0', '#e55e5e', '#223b53', '#fbb03b', '#ccc'];
 	// const colors = ['#206095', '#F66068', '#871A5B', '#A8BD3A', '#CCCCCC'];
@@ -191,7 +191,7 @@
 				style="https://bothness.github.io/ons-basemaps/data/style-omt.json"
 				location={{bounds: bounds_ew}}
 				on:load={initMap}
-				controls pmtiles>
+				controls>
 				{#each Object.keys(quads) as key}
 				<MapSource
 					id="quads-{key}"
