@@ -159,7 +159,7 @@
 	onMount(async () => {
 		let ds = await (await fetch(datasets_path)).json();
 		datasets = [...ds].sort((a, b) => a.varName.localeCompare(b.varName));
-		dataset = _dataset = datasets[0];
+		dataset = _dataset = datasets[4];
 		preloadData(dataset);
 	});
 
