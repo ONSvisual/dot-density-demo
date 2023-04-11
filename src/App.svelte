@@ -190,6 +190,7 @@
 				bind:map bind:zoom
 				style="https://bothness.github.io/ons-basemaps/data/style-omt.json"
 				location={{bounds: bounds_ew}}
+				maxzoom={15}
 				on:load={initMap}
 				controls>
 				{#each Object.keys(quads) as key}
@@ -223,7 +224,7 @@
 					id="dots"
 					type="vector"
 					url="{tiles_path(dataset.classCode)}"
-					maxzoom={11}>
+					maxzoom={14}>
 					<MapLayer
 						id="dots"
 						type="circle"
@@ -233,8 +234,8 @@
 							"circle-radius": {
 							"stops": [
 									[8, 0.7],
-									[12, 1.2],
-									[15, 3]
+									[12, 1],
+									[16, 2]
 								]
 							}
 						}}

@@ -13,14 +13,15 @@
       5, 2, 1
     ];
     // return zooms[Math.floor(zoom)];
-    return zoom < 12 ? zooms[Math.floor(zoom)] : 10;
+    return zoom < 14 ? zooms[Math.floor(zoom)] : 1;
   }
+  $: count = getCount(zoom);
 </script>
 
 <div class="info">
   <div class="info-place">{hovered ? hovered.areanm : selected ? selected.areanm : "England and Wales"}</div>
   <div class="info-dataset">{dataset ? dataset.varName : ""}</div>
-  <div class="info-small mt">One dot = {getCount(zoom).toLocaleString()} {dataset.unit}</div>
+  <div class="info-small mt">One dot = {count ? count.toLocaleString() : ''} {count === 1 ? dataset.unit.replace("households", "household").replace("people", "person"): dataset.unit}</div>
   <div class="info-small"><div class="marker"/> (% for England and Wales)</div>
 </div>
 
